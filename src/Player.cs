@@ -1,18 +1,34 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Bassoon;
 
 namespace SoundPlayer
 {
-    public class SoundPlayer : IDisposable
+    public class Player : IDisposable
     {
-        private static SoundPlayer? _instance;
+        private const string LinuxPath = "LD_LIBRARY_PATH";
+        private const string MacOsPath = "DYLD_LIBRARY_PATH";
+        
+        private static Player? _instance;
         private static readonly object Lock = new();
         
         private readonly BassoonEngine _engine = new();
         private Sound? _sound;
-        
-        private SoundPlayer(){}
+
+        private Player()
+        {
+            // Set environment variables
+            // See https://gitlab.com/define-private-public/Bassoon#a-note-about-running-on-linux-and-os-x
+            if (OperatingSystem.IsLinux())
+            {
+                Environment.SetEnvironmentVariable(LinuxPath, $"{Environment.GetEnvironmentVariable(LinuxPath)}:{Directory.GetCurrentDirectory()}");
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                Environment.SetEnvironmentVariable(MacOsPath, $"{Environment.GetEnvironmentVariable(MacOsPath)}:{Directory.GetCurrentDirectory()}");
+            }
+        }
 
         private float _volume = 1.0f;
         public float Volume
@@ -50,12 +66,12 @@ namespace SoundPlayer
             _sound?.Pause();
         }
 
-        public static SoundPlayer Instance()
+        public static Player Instance()
         {
             if (_instance != null) return _instance;
             lock (Lock)
             {
-                _instance ??= new SoundPlayer();
+                _instance ??= new Player();
             }
             return _instance;
         }
