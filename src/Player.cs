@@ -7,28 +7,13 @@ namespace SoundPlayer
 {
     public class Player : IDisposable
     {
-        private const string LinuxPath = "LD_LIBRARY_PATH";
-        private const string MacOsPath = "DYLD_LIBRARY_PATH";
-        
         private static Player? _instance;
         private static readonly object Lock = new();
         
         private readonly BassoonEngine _engine = new();
         private Sound? _sound;
 
-        private Player()
-        {
-            // Set environment variables
-            // See https://gitlab.com/define-private-public/Bassoon#a-note-about-running-on-linux-and-os-x
-            if (OperatingSystem.IsLinux())
-            {
-                Environment.SetEnvironmentVariable(LinuxPath, $"{Environment.GetEnvironmentVariable(LinuxPath)}:{Directory.GetCurrentDirectory()}");
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                Environment.SetEnvironmentVariable(MacOsPath, $"{Environment.GetEnvironmentVariable(MacOsPath)}:{Directory.GetCurrentDirectory()}");
-            }
-        }
+        private Player() { }
 
         private float _volume = 1.0f;
         public float Volume
